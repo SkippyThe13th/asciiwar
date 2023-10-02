@@ -2,10 +2,10 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Map {
-    private MapCell[][] map;
-    private ArrayList<MapCell> westShores, northShores, eastShores, southShores;
-    private Integer width, height;
-    private Random rand = new Random();
+    private final MapCell[][] map;
+    private final ArrayList<MapCell> westShores, northShores, eastShores, southShores, unclaimedLand;
+    private final Integer width, height;
+    private final Random rand = new Random();
 
     public Map(Integer height, Integer width, double landRatio) {
         this.height = height;
@@ -15,8 +15,26 @@ public class Map {
         northShores = new ArrayList<>();
         eastShores = new ArrayList<>();
         southShores = new ArrayList<>();
+        unclaimedLand = new ArrayList<>();
         fillSea();
         generateLand(landRatio);
+    }
+
+    public Map(Integer numOfPlayers, double landRatio) {
+        this.map = generateSpawnPoints(numOfPlayers);
+    }
+
+    /**
+     * Creates a map with a height:width ratio of 1:3 with enough spawn points for the indicated number of
+     * players.  Player spawns will have at least 2 cells of space between them and any other spawn, but will
+     * not be any further than 5 cells away from another player.  Player spawns will not be an equal distance from
+     * every other player spawn.  Player spawns will be connected by land in such a way that any spawn
+     * location can "access" any other be enough moves across land cells
+     * @param numOfPlayers the number of players that the map should have spawn points for
+     * @return a MapCell[][] containing the minimum map, ready to be filled in with more land
+     */
+    private MapCell[][] generateSpawnPoints(Integer numOfPlayers) {
+
     }
 
     private void generateLand(double landRatio) {
@@ -30,6 +48,7 @@ public class Map {
         northShores.add(origin);
         eastShores.add(origin);
         southShores.add(origin);
+        unclaimedLand.add(origin);
 
         MapCell newCell;
         int totalTries = 0;
@@ -45,6 +64,7 @@ public class Map {
             } else {
                 newCell = addNewLand(Direction.SOUTH);
             }
+            unclaimedLand.add(newCell);
             if (newCell == null) {
                 landCellCount--;
             }
@@ -204,6 +224,35 @@ public class Map {
         }
 
         return neighbors;
+    }
+
+    /**
+     * Spawns the player on the map of the game.  A player can only spawn if there is an unclaimed land cell
+     * that is not a neighbor to another player's claimed territory.
+     * @param player The player to spawn
+     * @return the MapCell that the player was spawned on.  Null if there was no valid spawn location.
+     */
+    public MapCell spawnPlayer(Player player) {
+        for (MapCell unclaimedCell : unclaimedLand) {
+            if (isValidSpawn(unclaimedCell)) {
+                unclaimedCell.bolster(player.getId());
+                return unclaimedCell;
+            }
+        }
+        return null;
+    }
+
+    private boolean isValidSpawn(MapCell cell) {
+        MapCell[] neighbors = getNeighbors(cell);
+        boolean isValid = true;
+
+        for (MapCell neighbor : neighbors) {
+            if (neighbor.getDisplayCharId() != MapCell.LAND || neighbor.getDisplayCharId() != MapCell.SEA) {
+                isValid = false;
+                break;
+            }
+        }
+        return isValid;
     }
 
     public String printMap() {

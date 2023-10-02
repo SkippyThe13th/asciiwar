@@ -2,10 +2,10 @@ public class MapCell {
     private Integer xLoc, yLoc, ownerId;
     private int displayCharId;
     private HP hp;
-    private boolean isLand;
+    private final boolean isLand;
 
     //acsii codes for '=' (land) and '~' (sea)
-    private final static Integer LAND = 35, SEA = 126;
+    public final static Integer LAND = 35, SEA = 126;
 
     public enum HP {
         STRONG,
@@ -16,7 +16,7 @@ public class MapCell {
     private MapCell() {
         this.xLoc = 0;
         this.yLoc = 0;
-        this.ownerId = 0;
+        this.ownerId = SEA;
         this.hp = HP.VULN;
         this.isLand = false;
         this.displayCharId = SEA;
@@ -25,7 +25,7 @@ public class MapCell {
     public MapCell(Integer x, Integer y) {
         this.xLoc = x;
         this.yLoc = y;
-        this.ownerId = 0;
+        this.ownerId = LAND;
         this.hp = HP.VULN;
         this.isLand = true;
         this.displayCharId = LAND;
@@ -48,7 +48,7 @@ public class MapCell {
         return oceanCell;
     }
 
-    private void bolster(int ownerId) {
+    public void bolster(int ownerId) {
         if (hp == HP.VULN && isLand) {
             hp = HP.WEAK;
             this.ownerId = ownerId;
@@ -59,7 +59,7 @@ public class MapCell {
         }
     }
 
-    private void weaken() {
+    public void weaken() {
         if (hp == HP.STRONG) {
             hp = HP.WEAK;
         } else if (hp == HP.WEAK) {
