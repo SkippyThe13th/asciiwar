@@ -32,7 +32,7 @@ public class Game {
                 newPlayer.setId(getNextId(id));
                 idPlayerMap.put(newPlayer.getId(), newPlayer);
             }
-            MapCell playerSpawn = map.spawnPlayer(newPlayer);
+            MapCell playerSpawn = map.spawnPlayer(map.getMap(), newPlayer);
             if (playerSpawn != null) {
                 newPlayer.addToTerritory(playerSpawn);
             }

@@ -2,7 +2,7 @@ public class MapCell {
     private Integer xLoc, yLoc, ownerId;
     private int displayCharId;
     private HP hp;
-    private final boolean isLand;
+    private boolean isLand;
 
     //acsii codes for '=' (land) and '~' (sea)
     public final static Integer LAND = 35, SEA = 126;
@@ -22,7 +22,7 @@ public class MapCell {
         this.displayCharId = SEA;
     }
 
-    public MapCell(Integer x, Integer y) {
+    private MapCell(Integer x, Integer y) {
         this.xLoc = x;
         this.yLoc = y;
         this.ownerId = LAND;
@@ -48,6 +48,10 @@ public class MapCell {
         return oceanCell;
     }
 
+    public static MapCell createLandCell(int x, int y) {
+        return new MapCell(x, y);
+    }
+
     public void bolster(int ownerId) {
         if (hp == HP.VULN && isLand) {
             hp = HP.WEAK;
@@ -68,6 +72,17 @@ public class MapCell {
         }
     }
 
+    public void makeLand() {
+        this.isLand = true;
+        this.ownerId = LAND;
+        this.displayCharId = LAND;
+    }
+
+    public void makeSea() {
+        this.isLand = false;
+        this.ownerId = SEA;
+        this.displayCharId = SEA;
+    }
     public Integer getOwnerId () {
         return ownerId;
     }
