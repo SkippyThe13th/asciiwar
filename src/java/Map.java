@@ -3,7 +3,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 public class Map {
-    private final MapCell[][] map;
+    private MapCell[][] map;
     private final ArrayList<MapCell> westShores, northShores, eastShores, southShores, unclaimedLand, spawnPoints;
     private Integer width, height;
     private final Random rand = new Random();
@@ -18,10 +18,9 @@ public class Map {
         if (numOfPlayers < 4) {
             numOfPlayers = 4;
         }
-        this.map = generateSpawnPointMap(numOfPlayers);
+        generateSpawnPointMap(numOfPlayers);
         //Add additional land to flesh out map
         generateLand(map, landRatio);
-        System.out.println(printMap(map));
     }
 
     /**
@@ -29,12 +28,10 @@ public class Map {
      * players.  Player spawns will be connected by land in such a way that any spawn
      * location can "access" any other be enough moves across land cells
      * @param numOfPlayers the number of players that the map should have spawn points for
-     * @return a MapCell[][] containing the minimum map, ready to be filled in with more land
      */
-    private MapCell[][] generateSpawnPointMap (Integer numOfPlayers) {
+    private void generateSpawnPointMap (Integer numOfPlayers) {
         HashMap<Integer, MapPoint> idPointMap = new HashMap<>();
         ArrayList<MapCell> cornerSpawns = new ArrayList<>();
-        MapCell[][] spawnMap;
         int xOffset, yOffset;
         boolean mapSizeIsValid = false;
         MapPoint farLeft = null,
@@ -75,53 +72,41 @@ public class Map {
             }
         }
 
-        spawnMap = new MapCell[width][height];
-        fillSea(spawnMap);
+        map = new MapCell[width][height];
+        fillSea(map);
         xOffset = (farLeft.x * -1) + 2;
         yOffset = (farDown.y * -1) + 2;
-        System.out.println("xOffset = " + xOffset);
-        System.out.println("yOffset = " + yOffset);
         for (MapPoint point : idPointMap.values()) {
-            System.out.println("Before applying offsets: " + point.x + ", " + point.y);
             point.x += xOffset;
             point.y += yOffset;
-            System.out.println("After applying offsets: " + point.x + ", " + point.y);
-            System.out.println("---");
-            spawnMap[point.x][point.y].makeLand();
-            removeNeighborsFromShoreLists(spawnMap, spawnMap[point.x][point.y]);
-            addToShoresLists(spawnMap, spawnMap[point.x][point.y]);
-            spawnPoints.add(spawnMap[point.x][point.y]);
+            map[point.x][point.y].makeUnclaimedLand();
+            addToShoresLists(map, map[point.x][point.y]);
+            spawnPoints.add(map[point.x][point.y]);
         }
 
-        System.out.println("Map width: " + width + " Map height: " + height);
-        System.out.println(printMap(spawnMap));
-
-        cornerSpawns.add(spawnMap[farLeft.x][farLeft.y]);
-        cornerSpawns.add(spawnMap[farRight.x][farRight.y]);
-        cornerSpawns.add(spawnMap[farUp.x][farUp.y]);
-        cornerSpawns.add(spawnMap[farDown.x][farDown.y]);
+        cornerSpawns.add(map[farLeft.x][farLeft.y]);
+        cornerSpawns.add(map[farRight.x][farRight.y]);
+        cornerSpawns.add(map[farUp.x][farUp.y]);
+        cornerSpawns.add(map[farDown.x][farDown.y]);
 
         //Connect all the spawn points with land cells
-        connectSpawnsWithLand(spawnMap, spawnMap[farLeft.x][farLeft.y], spawnMap[farRight.x][farRight.y]);
-        connectSpawnsWithLand(spawnMap, spawnMap[farUp.x][farUp.y], spawnMap[farDown.x][farDown.y]);
+        connectSpawnsWithLand(map[farLeft.x][farLeft.y], map[farRight.x][farRight.y]);
+        connectSpawnsWithLand(map[farUp.x][farUp.y], map[farDown.x][farDown.y]);
         for (MapPoint point : idPointMap.values()) {
-            if (!cornerSpawns.contains(spawnMap[point.x][point.y])) {
-                connectSpawnsWithLand(spawnMap, spawnMap[point.x][point.y], cornerSpawns.get(rand.nextInt(4)));
+            if (!cornerSpawns.contains(map[point.x][point.y])) {
+                connectSpawnsWithLand(map[point.x][point.y], cornerSpawns.get(rand.nextInt(4)));
             }
         }
 
         //Make all neighboring cells land to ensure at least 8 neighboring land cells
         for (MapPoint point : idPointMap.values()) {
             for (NeighborLocation nloc : NeighborLocation.values()) {
-                if (!spawnMap[point.x + nloc.x][point.y + nloc.y].isLand()) {
-                    spawnMap[point.x + nloc.x][point.y + nloc.y] = MapCell.createLandCell(point.x + nloc.x, point.y + nloc.y);
-                    removeNeighborsFromShoreLists(spawnMap, spawnMap[point.x + nloc.x][point.y + nloc.y]);
-                    addToShoresLists(spawnMap, spawnMap[point.x + nloc.x][point.y + nloc.y]);
+                if (!map[point.x + nloc.x][point.y + nloc.y].isLand()) {
+                    map[point.x + nloc.x][point.y + nloc.y] = MapCell.createLandCell(point.x + nloc.x, point.y + nloc.y);
+                    addToShoresLists(map, map[point.x + nloc.x][point.y + nloc.y]);
                 }
             }
         }
-
-        return spawnMap;
     }
 
     /**
@@ -182,33 +167,29 @@ public class Map {
         }
     }
 
-    private void connectSpawnsWithLand (MapCell[][] spawnMap, MapCell spawn1, MapCell spawn2) {
+    private void connectSpawnsWithLand (MapCell spawn1, MapCell spawn2) {
         int currentX = spawn1.getxLoc(),
             currentY = spawn1.getyLoc();
         while (currentX != spawn2.getxLoc() || currentY != spawn2.getyLoc()) {
             if (currentX < spawn2.getxLoc()) {
                 currentX++;
-                spawnMap[currentX][currentY].makeLand();
-                removeNeighborsFromShoreLists(spawnMap, spawnMap[currentX][currentY]);
-                addToShoresLists(spawnMap, spawnMap[currentX][currentY]);
+                map[currentX][currentY].makeUnclaimedLand();
+                addToShoresLists(map, map[currentX][currentY]);
             }
             if (currentY < spawn2.getyLoc()) {
                 currentY++;
-                spawnMap[currentX][currentY].makeLand();
-                removeNeighborsFromShoreLists(spawnMap, spawnMap[currentX][currentY]);
-                addToShoresLists(spawnMap, spawnMap[currentX][currentY]);
+                map[currentX][currentY].makeUnclaimedLand();
+                addToShoresLists(map, map[currentX][currentY]);
             }
             if (currentX > spawn2.getxLoc()) {
                 currentX--;
-                spawnMap[currentX][currentY].makeLand();
-                removeNeighborsFromShoreLists(spawnMap, spawnMap[currentX][currentY]);
-                addToShoresLists(spawnMap, spawnMap[currentX][currentY]);
+                map[currentX][currentY].makeUnclaimedLand();
+                addToShoresLists(map, map[currentX][currentY]);
             }
             if (currentY > spawn2.getyLoc()) {
                 currentY--;
-                spawnMap[currentX][currentY].makeLand();
-                removeNeighborsFromShoreLists(spawnMap, spawnMap[currentX][currentY]);
-                addToShoresLists(spawnMap, spawnMap[currentX][currentY]);
+                map[currentX][currentY].makeUnclaimedLand();
+                addToShoresLists(map, map[currentX][currentY]);
             }
         }
     }
@@ -279,8 +260,7 @@ public class Map {
      */
     private MapCell addRandomLandToShore (Direction shore) {
         MapCell originShore;
-        MapCell[] neighbors;
-        int x,y, dirCode;
+        int x,y;
 
         switch (shore) {
             case WEST -> {
@@ -290,7 +270,6 @@ public class Map {
                     y = originShore.getyLoc();
                     map[x][y] = MapCell.createLandCell(x, y);
                     //with new cell created, need to manage lists of shores
-                    removeNeighborsFromShoreLists(map, map[x][y]);
                     addToShoresLists(map, map[x][y]);
                     return map[x][y];
                 } else {
@@ -303,7 +282,6 @@ public class Map {
                     x = originShore.getxLoc();
                     y = originShore.getyLoc() - 1;
                     map[x][y] = MapCell.createLandCell(x, y);
-                    removeNeighborsFromShoreLists(map, map[x][y]);
                     addToShoresLists(map, map[x][y]);
                     return map[x][y];
                 } else {
@@ -316,7 +294,6 @@ public class Map {
                     x = originShore.getxLoc() + 1;
                     y = originShore.getyLoc();
                     map[x][y] = MapCell.createLandCell(x, y);
-                    removeNeighborsFromShoreLists(map, map[x][y]);
                     addToShoresLists(map, map[x][y]);
                     return map[x][y];
                 } else {
@@ -329,7 +306,6 @@ public class Map {
                     x = originShore.getxLoc();
                     y = originShore.getyLoc() + 1;
                     map[x][y] = MapCell.createLandCell(x, y);
-                    removeNeighborsFromShoreLists(map, map[x][y]);
                     addToShoresLists(map, map[x][y]);
                     return map[x][y];
                 } else {
@@ -343,31 +319,12 @@ public class Map {
     }
 
     /**
-     * Removes the neighbors of a map cell from the corresponding shores list
-     * @param cell the cell whose neighbors should be removed from their shores list
-     */
-    private void removeNeighborsFromShoreLists (MapCell[][] map, MapCell cell) {
-        MapCell[] neighbors  = getNeighbors(map, cell);
-        if (neighbors[NeighborLocation.LEFT.locCode] != null && neighbors[NeighborLocation.LEFT.locCode].isLand()) {
-            eastShores.remove(neighbors[NeighborLocation.LEFT.locCode]);
-        }
-        if (neighbors[NeighborLocation.UP.locCode] != null && neighbors[NeighborLocation.UP.locCode].isLand()) {
-            southShores.remove(neighbors[NeighborLocation.UP.locCode]);
-        }
-        if (neighbors[NeighborLocation.RIGHT.locCode] != null && neighbors[NeighborLocation.RIGHT.locCode].isLand()) {
-            westShores.remove(neighbors[NeighborLocation.RIGHT.locCode]);
-        }
-        if (neighbors[NeighborLocation.DOWN.locCode] != null && neighbors[NeighborLocation.DOWN.locCode].isLand()) {
-            northShores.remove(neighbors[NeighborLocation.DOWN.locCode]);
-        }
-    }
-
-    /**
      * Adds the given cell to the corresponding shore list based on whether it has neighboring land cells
+     * and removes the neighbors of the cell from the corresponding shores list
      * @param cell the cell to be added
      */
     private void addToShoresLists(MapCell[][]map, MapCell cell) {
-        MapCell[] neighbors  = getNeighbors(map, cell);
+        MapCell[] neighbors  = getNeighbors(cell);
         if (neighbors[NeighborLocation.LEFT.locCode] == null || !neighbors[NeighborLocation.LEFT.locCode].isLand()) {
             if (cell.getxLoc() > 0) {
                 westShores.add(cell);
@@ -388,9 +345,89 @@ public class Map {
                 southShores.add(cell);
             }
         }
+
+        if (neighbors[NeighborLocation.LEFT.locCode] != null && neighbors[NeighborLocation.LEFT.locCode].isLand()) {
+            eastShores.remove(neighbors[NeighborLocation.LEFT.locCode]);
+        }
+        if (neighbors[NeighborLocation.UP.locCode] != null && neighbors[NeighborLocation.UP.locCode].isLand()) {
+            southShores.remove(neighbors[NeighborLocation.UP.locCode]);
+        }
+        if (neighbors[NeighborLocation.RIGHT.locCode] != null && neighbors[NeighborLocation.RIGHT.locCode].isLand()) {
+            westShores.remove(neighbors[NeighborLocation.RIGHT.locCode]);
+        }
+        if (neighbors[NeighborLocation.DOWN.locCode] != null && neighbors[NeighborLocation.DOWN.locCode].isLand()) {
+            northShores.remove(neighbors[NeighborLocation.DOWN.locCode]);
+        }
     }
 
-    private MapCell[] getNeighbors(MapCell[][] map, MapCell cell) {
+    /**
+     * Attempts to find a cell adjacent to a Player's territory that is a valid expansion target.
+     * Uses a {@link MapCellComparator} to determine the validity of the expansion target
+     * @param player The player whose borders should be searched
+     * @param comparatorType The type of expansion target to be searched for
+     * @return A MapCell that is a valid expansion target, null if none are found
+     */
+    public MapCell findExpansionTarget (Player player, MapCellComparator.Type comparatorType) {
+        MapCellComparator comparator = new MapCellComparator(comparatorType, player);
+        Map.Direction expansionDirection;
+        MapCell originBorder;
+        ArrayList<MapCell> borders;
+        int x, y, startDir, bordersChecked;
+
+        startDir = rand.nextInt(4);
+        if (startDir == 0) {
+            expansionDirection = Map.Direction.WEST;
+        } else if (startDir == 1) {
+            expansionDirection = Map.Direction.NORTH;
+        } else if (startDir == 2) {
+            expansionDirection = Map.Direction.EAST;
+        } else {
+            expansionDirection = Map.Direction.SOUTH;
+        }
+        bordersChecked = 0;
+        while (bordersChecked < 4) {
+            switch (expansionDirection) {
+                case WEST -> borders = player.getWestBorders();
+                case NORTH -> borders = player.getNorthBorders();
+                case EAST -> borders = player.getEastBorders();
+                case SOUTH -> borders = player.getSouthBorders();
+                default -> {
+                    return null;
+                }
+            }
+            if (borders.size() > 0){
+                originBorder = borders.get(rand.nextInt(borders.size()));
+                x = originBorder.getxLoc() - 1;
+                y = originBorder.getyLoc();
+                if (comparator.matches(map[x][y])){
+                    return map[x][y];
+                }
+            } else {
+                switch (expansionDirection) {
+                    case WEST -> expansionDirection = Direction.NORTH;
+                    case NORTH -> expansionDirection = Direction.EAST;
+                    case EAST -> expansionDirection = Direction.SOUTH;
+                    case SOUTH -> expansionDirection = Direction.WEST;
+                }
+                bordersChecked++;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the cell found at coordinates (x, y) if it exists.
+     * @return the MapCell at the given coordinates, null if the coordinates are invalid
+     */
+    public MapCell getCell(Integer x, Integer y) {
+        if ((0 < x && x < width) && (0 < y && y < height)) {
+            return map[x][y];
+        } else {
+            return null;
+        }
+    }
+
+    public MapCell[] getNeighbors(MapCell cell) {
         MapCell[] neighbors = new MapCell[8];
         int neighborX, neighborY;
 
@@ -411,20 +448,8 @@ public class Map {
         return neighbors;
     }
 
-    private boolean isValidSpawn(MapCell[][] map, MapCell cell) {
-        MapCell[] neighbors = getNeighbors(map, cell);
-        boolean isValid = true;
-
-        for (MapCell neighbor : neighbors) {
-            if (neighbor.getDisplayCharId() != MapCell.LAND || neighbor.getDisplayCharId() != MapCell.SEA) {
-                isValid = false;
-                break;
-            }
-        }
-        return isValid;
-    }
-
-    public String printMap(MapCell[][] map) {
+    @Override
+    public String toString () {
         StringBuilder mapString = new StringBuilder();
 
         for (int y=0; y<height; y++) {
@@ -436,12 +461,16 @@ public class Map {
         return mapString.toString();
     }
 
-    public MapCell[][] getMap() {
-        return map;
-    }
-
     public ArrayList<MapCell> getSpawnPoints () {
         return spawnPoints;
+    }
+
+    public Integer getWidth () {
+        return width;
+    }
+
+    public Integer getHeight () {
+        return height;
     }
 
     public enum Direction {

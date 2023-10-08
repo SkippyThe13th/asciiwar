@@ -1,3 +1,4 @@
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -5,7 +6,7 @@ public class Player {
     //Player ids are unique per game, and range from 97-122 [inclusive-inclusive] which are the ascii decimal codes for lower case letters.
     private Integer id, expansionFund;
     private char weakDisplay, strongDisplay;
-    private ArrayList<MapCell> territory;
+    private ArrayList<MapCell> territory, westBorders, northBorders, eastBorders, southBorders;
     private String username;
     private HashMap<Integer, Player> enemyMap;
 
@@ -13,7 +14,18 @@ public class Player {
         this.expansionFund = 0;
         this.username = username;
         this.territory = new ArrayList<>();
+        this.westBorders = new ArrayList<>();
+        this.northBorders = new ArrayList<>();
+        this.eastBorders = new ArrayList<>();
+        this.southBorders = new ArrayList<>();
         this.enemyMap = new HashMap<>();
+    }
+
+    Player (String username, Integer id, char weakDisplay, char strongDisplay) {
+        this.username = username;
+        this.id = id;
+        this.weakDisplay = weakDisplay;
+        this.strongDisplay = strongDisplay;
     }
 
     public void addEnemy(Player player) {
@@ -28,6 +40,38 @@ public class Player {
         territory.add(cell);
     }
 
+    public void addToWestBorder(MapCell cell) {
+        westBorders.add(cell);
+    }
+
+    public void addToNorthBorder(MapCell cell) {
+        northBorders.add(cell);
+    }
+
+    public void addToEastBorder(MapCell cell) {
+        eastBorders.add(cell);
+    }
+
+    public void addToSouthBorder(MapCell cell) {
+        southBorders.add(cell);
+    }
+
+    public void removeFromWestBorder(MapCell cell) {
+        westBorders.remove(cell);
+    }
+
+    public void removeFromNorthBorder(MapCell cell) {
+        northBorders.remove(cell);
+    }
+
+    public void removeFromEastBorder(MapCell cell) {
+        eastBorders.remove(cell);
+    }
+
+    public void removeFromSouthBorder(MapCell cell) {
+        southBorders.remove(cell);
+    }
+
     public void removeFromTerritory(MapCell cell) {
         territory.remove(cell);
     }
@@ -37,11 +81,11 @@ public class Player {
     }
 
     public void chargeForExpansion() {
-        expansionFund -= 2;
+        expansionFund -= 1;
     }
 
     public boolean canExpand() {
-        return expansionFund >= 2;
+        return expansionFund > 0;
     }
 
     public Integer getId () {
@@ -68,6 +112,22 @@ public class Player {
 
     public HashMap<Integer, Player> getEnemyMap () {
         return enemyMap;
+    }
+
+    public ArrayList<MapCell> getWestBorders () {
+        return westBorders;
+    }
+
+    public ArrayList<MapCell> getNorthBorders () {
+        return northBorders;
+    }
+
+    public ArrayList<MapCell> getEastBorders () {
+        return eastBorders;
+    }
+
+    public ArrayList<MapCell> getSouthBorders () {
+        return southBorders;
     }
 
     public ArrayList<MapCell> getTerritory () {

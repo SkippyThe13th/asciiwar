@@ -1,11 +1,14 @@
 public class Main {
     public static void main (String[] args) {
-        int height = 7;
-        int width = 30;
-        double landRatio = 0.8;
-        int players = 10;
+        int jackpot = 100;
 
-        Map map = new Map(players, landRatio);
-        //System.out.print(map.printMap(map.getMap()));
+        Game game = new Game(Game.LandDensity.NORMAL, jackpot);
+        game.addPlayer(new Player("player1"));
+        game.addPlayer(new Player("jeff"));
+        game.addPlayer(new Player("player3"));
+        game.addPlayer(new Player("me"));
+        game.addPlayer(new Player("bob"));
+        game.startGame();
+        System.out.println(game.getMapString());
     }
 }

@@ -1,34 +1,33 @@
 public class MapCell {
-    private Integer xLoc, yLoc, ownerId;
-    private int displayCharId;
+    private static Land land = new Land();
+    private static Sea sea = new Sea();
+    private Player owner;
+    private Integer xLoc, yLoc;
     private HP hp;
     private boolean isLand;
 
     //acsii codes for '=' (land) and '~' (sea)
-    public final static Integer LAND = 35, SEA = 126;
+    public final static int LAND = 35, SEA = 126;
 
     public enum HP {
         STRONG,
-        WEAK,
-        VULN;
+        WEAK;
     }
 
     private MapCell() {
         this.xLoc = 0;
         this.yLoc = 0;
-        this.ownerId = SEA;
-        this.hp = HP.VULN;
+        this.owner = sea;
+        this.hp = HP.WEAK;
         this.isLand = false;
-        this.displayCharId = SEA;
     }
 
     private MapCell(Integer x, Integer y) {
         this.xLoc = x;
         this.yLoc = y;
-        this.ownerId = LAND;
-        this.hp = HP.VULN;
+        this.owner = land;
+        this.hp = HP.WEAK;
         this.isLand = true;
-        this.displayCharId = LAND;
     }
 
     /**
@@ -52,44 +51,35 @@ public class MapCell {
         return new MapCell(x, y);
     }
 
-    public void bolster(int ownerId) {
-        if (hp == HP.VULN && isLand) {
-            hp = HP.WEAK;
-            this.ownerId = ownerId;
-            displayCharId = ownerId;
-        } else if (hp == HP.WEAK) {
-            hp = HP.STRONG;
-            displayCharId -= 32;
-        }
-    }
-
-    public void weaken() {
-        if (hp == HP.STRONG) {
-            hp = HP.WEAK;
-        } else if (hp == HP.WEAK) {
-            hp = HP.VULN;
-            ownerId = 0;
+    public void attack(Player attacker) {
+        if (owner.getId().equals(LAND)) {
+            this.hp = HP.WEAK;
+            this.setOwnership(attacker);
+        } else if (!owner.getId().equals(SEA)) {
+            if (this.hp == HP.WEAK) {
+                this.makeUnclaimedLand();
+            } else if (this.hp == HP.STRONG) {
+                this.hp = HP.WEAK;
+            }
         }
     }
 
     public void setOwnership(Player player) {
-        this.ownerId = player.getId();
-        this.displayCharId = player.getId();
+        this.owner = player;
     }
 
-    public void makeLand() {
+    public void makeUnclaimedLand () {
         this.isLand = true;
-        this.ownerId = LAND;
-        this.displayCharId = LAND;
+        this.owner = land;
+        this.hp = HP.WEAK;
     }
 
     public void makeSea() {
+        this.owner = sea;
         this.isLand = false;
-        this.ownerId = SEA;
-        this.displayCharId = SEA;
     }
     public Integer getOwnerId () {
-        return ownerId;
+        return owner.getId();
     }
 
     public Integer getxLoc () {
@@ -109,7 +99,11 @@ public class MapCell {
     }
 
     public int getDisplayCharId () {
-        return displayCharId;
+        if (this.hp == HP.WEAK) {
+            return owner.getWeakDisplay();
+        } else {
+            return owner.getStrongDisplay();
+        }
     }
 
     public HP getHp () {
@@ -120,4 +114,17 @@ public class MapCell {
         return this.isLand;
     }
 
+    private static class Land extends Player {
+
+        private Land () {
+            super("Land", LAND, (char)LAND, (char)LAND);
+        }
+    }
+
+    private static class Sea extends Player {
+
+        private Sea () {
+            super("Sea", SEA, (char)SEA, (char)LAND);
+        }
+    }
 }
