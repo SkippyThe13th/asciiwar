@@ -1,17 +1,45 @@
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class Game {
-    HashMap<Integer, Player> idPlayerMap;
-    Map map;
-    LocalDate startDate, endDate;
+    private HashMap<Integer, Player> idPlayerMap;
+    private Map map;
+    private LandDensity landRatio;
+    private LocalDate startDate, endDate;
+    private Integer jackpot;
 
-    public Game(Map map) {
+    public Game(LandDensity landRatio, int startingJackpot) {
         this.idPlayerMap = new HashMap<>();
-        this.map = map;
         this.startDate = LocalDate.now();
         this.endDate = startDate.plusWeeks(1);
+        this.jackpot = startingJackpot;
+        this.landRatio = landRatio;
+    }
+
+    public void startGame() {
+        this.map = new Map(idPlayerMap.size(), landRatio.getLandRatio());
+        spawnPlayers();
+    }
+
+    public GameReport endGame() {
+        GameReport report = new GameReport(this);
+
+        return report;
+    }
+
+    private void spawnPlayers() {
+        MapCell cell;
+        int i = 0;
+        for (Player player : idPlayerMap.values()) {
+            cell = map.getSpawnPoints().get(i);
+            player.addToTerritory(cell);
+            cell.setOwnership(player);
+            player.addToExpansionFund(8);
+            i++;
+        }
     }
 
     /**
@@ -32,20 +60,23 @@ public class Game {
                 newPlayer.setId(getNextId(id));
                 idPlayerMap.put(newPlayer.getId(), newPlayer);
             }
-            MapCell playerSpawn = map.spawnPlayer(map.getMap(), newPlayer);
-            if (playerSpawn != null) {
-                newPlayer.addToTerritory(playerSpawn);
-            }
         } else {
             return null;
         }
         return newPlayer.getId();
     }
 
+    public void adjustPlayerFunds(Player player, int fundsToAdd) {
+        idPlayerMap.get(player.getId()).addToExpansionFund(fundsToAdd);
+        jackpot += fundsToAdd;
+    }
+
     public ExpansionReport expand(Player player, int expansionNum) {
         ExpansionReport report = new ExpansionReport(player);
         if (player.canExpand()) {
-
+            //TODO: Implement this
+            //call method on map to expand player's territory or improve it
+            //increment jackpot by units expended to expand
         }
         return report;
     }
@@ -66,12 +97,21 @@ public class Game {
      */
     public boolean petitionPeace(Player initiator, Player target) {
         idPlayerMap.get(initiator.getId()).removeEnemy(target);
-        if (target.getEnemyMap().get(initiator.getId()) == null) {
-            //The initiator is not an enemy to the target, so mutual peace has been established
-            return true;
-        } else {
-            return false;
-        }
+        //The initiator is not an enemy to the target, so mutual peace has been established
+        return target.getEnemyMap().get(initiator.getId()) == null;
+    }
+
+    /**
+     * Returns a list of Players in descending order based on the amount of cells within their territory
+     * @return an ArrayList of Players, where the first 3 elements represent the 1st, 2nd, and 3rd place Players
+     */
+    public ArrayList<Player> getScores () {
+        ArrayList<Player> winners;
+
+        winners = new ArrayList<>(idPlayerMap.values().stream().sorted(Comparator.comparingInt(player -> player.getTerritory().size())).toList());
+        winners.sort(Collections.reverseOrder());
+
+        return winners;
     }
 
     private int getNextId(int initialId) {
@@ -88,7 +128,47 @@ public class Game {
         return nextId;
     }
 
-    public Player getPlayer(Integer id) {
+    public Player getPlayer(int id) {
         return idPlayerMap.get(id);
+    }
+
+    private Integer getJackpot () {
+        return jackpot;
+    }
+
+    private Map getMap () {
+        return map;
+    }
+
+    private class GameReport {
+        ArrayList<Player> winners;
+        int[] payouts;
+
+        private GameReport (Game game) {
+            winners = game.getScores();
+            payouts = new int[3];
+            payouts[0] = game.getJackpot() / 2;
+            payouts[1] = game.getJackpot() / 3;
+            payouts[2] = game.getJackpot() / 5;
+        }
+
+        public ArrayList<Player> getWinners () {
+            return winners;
+        }
+    }
+
+    public static enum LandDensity {
+        NORMAL(.55),
+        SPARSE(.40),
+        DENSE(.80);
+
+        private final double ratio;
+        private LandDensity(double ratio) {
+            this.ratio = ratio;
+        }
+
+        public double getLandRatio() {
+            return this.ratio;
+        }
     }
 }

@@ -72,6 +72,11 @@ public class MapCell {
         }
     }
 
+    public void setOwnership(Player player) {
+        this.ownerId = player.getId();
+        this.displayCharId = player.getId();
+    }
+
     public void makeLand() {
         this.isLand = true;
         this.ownerId = LAND;

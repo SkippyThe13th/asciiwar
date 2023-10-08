@@ -69,4 +69,8 @@ public class Player {
     public HashMap<Integer, Player> getEnemyMap () {
         return enemyMap;
     }
+
+    public ArrayList<MapCell> getTerritory () {
+        return territory;
+    }
 }

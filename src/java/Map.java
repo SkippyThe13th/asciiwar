@@ -257,6 +257,10 @@ public class Map {
         }
     }
 
+    /**
+     * Fills all empty cells in a map with Sea Cells
+     * @param map the map to fill with sea cells
+     */
     private void fillSea(MapCell[][] map) {
         for (int y=0; y<height; y++){
             for (int x = 0; x < width; x++){
@@ -407,22 +411,6 @@ public class Map {
         return neighbors;
     }
 
-    /**
-     * Spawns the player on the map of the game.  A player can only spawn if there is an unclaimed land cell
-     * that is not a neighbor to another player's claimed territory.
-     * @param player The player to spawn
-     * @return the MapCell that the player was spawned on.  Null if there was no valid spawn location.
-     */
-    public MapCell spawnPlayer(MapCell[][] map, Player player) {
-        for (MapCell unclaimedCell : unclaimedLand) {
-            if (isValidSpawn(map, unclaimedCell)) {
-                unclaimedCell.bolster(player.getId());
-                return unclaimedCell;
-            }
-        }
-        return null;
-    }
-
     private boolean isValidSpawn(MapCell[][] map, MapCell cell) {
         MapCell[] neighbors = getNeighbors(map, cell);
         boolean isValid = true;
@@ -448,8 +436,12 @@ public class Map {
         return mapString.toString();
     }
 
-    public MapCell[][] getMap () {
+    public MapCell[][] getMap() {
         return map;
+    }
+
+    public ArrayList<MapCell> getSpawnPoints () {
+        return spawnPoints;
     }
 
     public enum Direction {
