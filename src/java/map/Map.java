@@ -373,8 +373,8 @@ public class Map {
      */
     public MapCell findExpansionTarget (Player player, MapCellComparator.Type comparatorType) {
         MapCellComparator comparator = new MapCellComparator(comparatorType, player);
+        MapCell possibleExpansion;
         Map.NeighborLocation expansionDirection;
-        MapCell originBorder;
         ArrayList<MapCell> borders;
         int x, y, startDir, bordersChecked;
 
@@ -400,11 +400,13 @@ public class Map {
                 }
             }
             if (borders.size() > 0){
-                originBorder = borders.get(rand.nextInt(borders.size()));
-                x = originBorder.getxLoc() + expansionDirection.x;
-                y = originBorder.getyLoc() - expansionDirection.y;
-                if (comparator.matches(map[x][y])){
-                    return map[x][y];
+                for (MapCell borderCell : borders) {
+                    x = borderCell.getxLoc() + expansionDirection.x;
+                    y = borderCell.getyLoc() + expansionDirection.y;
+                    possibleExpansion = map[x][y];
+                    if (comparator.matches(possibleExpansion)){
+                        return possibleExpansion;
+                    }
                 }
             }
             switch (expansionDirection) {
@@ -414,6 +416,15 @@ public class Map {
                 case DOWN -> expansionDirection = NeighborLocation.LEFT;
             }
             bordersChecked++;
+        }
+        return null;
+    }
+
+    public MapCell findImprovementTarget (Player player) {
+        for (MapCell cell : player.getTerritory()) {
+            if (cell.getHp() == MapCell.HP.WEAK) {
+                return cell;
+            }
         }
         return null;
     }

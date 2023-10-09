@@ -38,9 +38,6 @@ public class Game {
     public void startGame() {
         this.map = new Map(idPlayerMap.size(), landRatio.getLandRatio());
         spawnPlayers();
-        for (Player player : idPlayerMap.values()) {
-            evaluateBorders(player, player.getTerritory().get(0));
-        }
         advanceGameStage();
     }
 
@@ -61,6 +58,10 @@ public class Game {
         for (Player player : idPlayerMap.values()) {
             cell = map.getSpawnPoints().get(i);
             player.addToTerritory(cell);
+            player.addToWestBorder(cell);
+            player.addToNorthBorder(cell);
+            player.addToEastBorder(cell);
+            player.addToSouthBorder(cell);
             cell.setOwnership(player);
             player.addToExpansionFund(8);
             i++;
@@ -98,44 +99,44 @@ public class Game {
 
     public ExpansionReport expand(Player player, int timesToExpand) {
         ExpansionReport report = new ExpansionReport(player);
-        MapCell target;
+        MapCell result;
         if (player.canExpand(timesToExpand)) {
             for (int i = 0; i < timesToExpand; i++) {
-                target = executeExpansion(player);
-                if (target != null && target.getOwnerId().equals(player.getId())) {
-                    if (target.getHp() == MapCell.HP.STRONG) {
-                        report.territoryImproved.add(target);
-                        report.expansionsAttempted++;
-                        report.successfulExpansions++;
+                result = executeExpansion(player);
+
+                if (result != null && result.getOwnerId().equals(player.getId())) {
+                    if (result.getHp() == MapCell.HP.STRONG) {
+                        report.territoryImproved.add(result);
                     } else {
-                        report.territoryGained.add(target);
-                        report.expansionsAttempted++;
-                        report.successfulExpansions++;
+                        report.territoryGained.add(result);
                     }
-                } else if (target != null && !target.getOwnerId().equals(player.getId())) {
-                    report.territoryWeakened.add(target);
                     report.expansionsAttempted++;
                     report.successfulExpansions++;
-                } else if (target == null) {
+                } else if (result != null && !result.getOwnerId().equals(player.getId())) {
+                    report.territoryWeakened.add(result);
+                    report.expansionsAttempted++;
+                    report.successfulExpansions++;
+                } else if (result == null) {
                     report.expansionsAttempted++;
                 }
             }
         } else {
+            //The player tried to expand more times than their budget allows, so expand as many times as their
+            //funds allow.
             for (int i = 0; i < player.getExpansionFund(); i++) {
-                target = executeExpansion(player);
-                if (target != null && target.getOwnerId().equals(player.getId())) {
-                    if (target.getHp() == MapCell.HP.STRONG) {
-                        report.territoryImproved.add(target);
-                        report.expansionsAttempted++;
-                        report.successfulExpansions++;
+
+                result = executeExpansion(player);
+                if (result != null && result.getOwnerId().equals(player.getId())) {
+                    if (result.getHp() == MapCell.HP.STRONG) {
+                        report.territoryImproved.add(result);
                     } else {
-                        report.territoryGained.add(target);
-                        report.expansionsAttempted++;
-                        report.successfulExpansions++;
+                        report.territoryGained.add(result);
                     }
-                } else if (target != null && !target.getOwnerId().equals(player.getId())){
-                    report.territoryWeakened.add(target);
-                } else if (target == null) {
+                    report.expansionsAttempted++;
+                    report.successfulExpansions++;
+                } else if (result != null && !result.getOwnerId().equals(player.getId())){
+                    report.territoryWeakened.add(result);
+                } else if (result == null) {
                     report.expansionsAttempted++;
                 }
             }
@@ -158,6 +159,7 @@ public class Game {
      */
     private MapCell executeExpansion (Player player) {
         MapCell expansionTarget = null;
+        Player playerToReevaluate;
 
         //find adjacent empty land
         if (gameStage == 1 || gameStage == 2) {
@@ -169,12 +171,14 @@ public class Game {
         }
         //if not at war or no adjacent enemies, look to improve WEAK land
         if (expansionTarget == null && (gameStage == 1 || gameStage == 2)) {
-            expansionTarget = map.findExpansionTarget(player, MapCellComparator.Type.WEAK_OWNED_LAND);
+            expansionTarget = map.findImprovementTarget(player);
         }
 
         if (expansionTarget != null) {
-            expansionTarget.attack(player);
-            evaluateBorders(player, expansionTarget);
+            playerToReevaluate = expansionTarget.attack(player);
+            if (playerToReevaluate != null) {
+                evaluateBorders(playerToReevaluate, expansionTarget);
+            }
             player.chargeForExpansion();
             return expansionTarget;
         }
@@ -187,49 +191,69 @@ public class Game {
      * Reevaluates a game.Player's borders, adding a new cell to any respective border lists for future
      * use.  Neighbors of the passed cell will also be removed from any applicable border lists.
      * @param player The game.Player whose borders should be reevaluated
-     * @param newCell The new cell that the game.Player owns.
+     * @param cell The new cell that the game.Player owns.
      */
-    private void evaluateBorders(Player player, MapCell newCell) {
-        MapCell[] neighbors  = map.getNeighbors(newCell);
-        //add the new cell to any applicable border lists
-        if (neighbors[LEFT.locCode] != null && !neighbors[LEFT.locCode].getOwnerId().equals(player.getId())) {
-            if (newCell.getxLoc() > 0) {
-                player.addToWestBorder(newCell);
+    private void evaluateBorders(Player player, MapCell cell) {
+        MapCell[] neighbors  = map.getNeighbors(cell);
+        if (player.getTerritory().contains(cell)) {
+            //The player gained the given cell, and it should be added to any applicable borders lists
+            if (neighbors[LEFT.locCode] != null && !neighbors[LEFT.locCode].getOwnerId().equals(MapCell.SEA)
+                && !neighbors[LEFT.locCode].getOwnerId().equals(player.getId())) {
+                    player.addToWestBorder(cell);
+            }
+            if (neighbors[UP.locCode] != null && !neighbors[UP.locCode].getOwnerId().equals(MapCell.SEA)
+                && !neighbors[UP.locCode].getOwnerId().equals(player.getId())) {
+                    player.addToNorthBorder(cell);
+            }
+            if (neighbors[RIGHT.locCode] != null && !neighbors[RIGHT.locCode].getOwnerId().equals(MapCell.SEA)
+                && !neighbors[RIGHT.locCode].getOwnerId().equals(player.getId())) {
+                    player.addToEastBorder(cell);
+            }
+            if (neighbors[DOWN.locCode] != null && !neighbors[DOWN.locCode].getOwnerId().equals(MapCell.SEA)
+                && !neighbors[DOWN.locCode].getOwnerId().equals(player.getId())) {
+                    player.addToSouthBorder(cell);
+            }
+            //remove neighbors of the cell from border lists if applicable
+            if (neighbors[LEFT.locCode] != null && neighbors[LEFT.locCode].getOwnerId().equals(player.getId())) {
+                player.removeFromEastBorder(neighbors[LEFT.locCode]);
+            }
+            if (neighbors[UP.locCode] != null && neighbors[UP.locCode].getOwnerId().equals(player.getId())) {
+                player.removeFromSouthBorder(neighbors[UP.locCode]);
+            }
+            if (neighbors[RIGHT.locCode] != null && neighbors[RIGHT.locCode].getOwnerId().equals(player.getId())) {
+                player.removeFromWestBorder(neighbors[RIGHT.locCode]);
+            }
+            if (neighbors[DOWN.locCode] != null && neighbors[DOWN.locCode].getOwnerId().equals(player.getId())) {
+                player.removeFromNorthBorder(neighbors[DOWN.locCode]);
+            }
+        } else {
+            //The player lost the given cell, so it should be removed from border lists
+            player.removeFromWestBorder(cell);
+            player.removeFromNorthBorder(cell);
+            player.removeFromEastBorder(cell);
+            player.removeFromSouthBorder(cell);
+            //The neighbors of the lost cell should be reevaluated, because they may be new borders
+            if (neighbors[LEFT.locCode] != null && neighbors[LEFT.locCode].getOwnerId().equals(player.getId())) {
+                player.addToEastBorder(neighbors[LEFT.locCode]);
+            }
+            if (neighbors[UP.locCode] != null && neighbors[UP.locCode].getOwnerId().equals(player.getId())) {
+                player.addToSouthBorder(neighbors[UP.locCode]);
+            }
+            if (neighbors[RIGHT.locCode] != null && neighbors[RIGHT.locCode].getOwnerId().equals(player.getId())) {
+                player.addToWestBorder(neighbors[RIGHT.locCode]);
+            }
+            if (neighbors[DOWN.locCode] != null && neighbors[DOWN.locCode].getOwnerId().equals(player.getId())) {
+                player.addToNorthBorder(neighbors[DOWN.locCode]);
             }
         }
-        if (neighbors[UP.locCode] != null && !neighbors[UP.locCode].getOwnerId().equals(player.getId())) {
-            if (newCell.getyLoc() > 0) {
-                player.addToNorthBorder(newCell);
-            }
-        }
-        if (neighbors[RIGHT.locCode] != null &&!neighbors[RIGHT.locCode].getOwnerId().equals(player.getId())) {
-            if (newCell.getxLoc() < map.getWidth() - 1) {
-                player.addToEastBorder(newCell);
-            }
-        }
-        if (neighbors[DOWN.locCode] != null &&!neighbors[DOWN.locCode].getOwnerId().equals(player.getId())) {
-            if (newCell.getyLoc() < map.getHeight() - 1) {
-                player.addToSouthBorder(newCell);
-            }
-        }
-        //remove neighbors of the cell from border lists if applicable
-        if (neighbors[LEFT.locCode] != null && neighbors[LEFT.locCode].getOwnerId().equals(player.getId())) {
-            player.removeFromEastBorder(neighbors[LEFT.locCode]);
-        }
-        if (neighbors[UP.locCode] != null && neighbors[UP.locCode].getOwnerId().equals(player.getId())) {
-            player.removeFromSouthBorder(neighbors[UP.locCode]);
-        }
-        if (neighbors[RIGHT.locCode] != null && neighbors[RIGHT.locCode].getOwnerId().equals(player.getId())) {
-            player.removeFromWestBorder(neighbors[RIGHT.locCode]);
-        }
-        if (neighbors[DOWN.locCode] != null && neighbors[DOWN.locCode].getOwnerId().equals(player.getId())) {
-            player.removeFromNorthBorder(neighbors[DOWN.locCode]);
-        }
+
     }
 
     public void declareWar(Player initiator, Player target) {
-        idPlayerMap.get(initiator.getId()).addEnemy(target);
-        idPlayerMap.get(target.getId()).addEnemy(initiator);
+        if (!initiator.getId().equals(target.getId())) {
+            initiator.addEnemy(target);
+            target.addEnemy(initiator);
+        }
     }
 
     /**

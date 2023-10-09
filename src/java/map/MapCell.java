@@ -45,21 +45,43 @@ public class MapCell {
         return new MapCell(x, y);
     }
 
-    public void attack(Player attacker) {
+    /**
+     * Resolves an attack from a player.  If the attack is against unclaimed land,
+     * then the player gains that land.  If the attack is against the land of another
+     * player, then the hp of the land is reduced.  If the owned land has an hp of
+     * WEAK, then the owner loses control of the land
+     * @param attacker the attacking player
+     * @return the Player whose borders should be reevaluated.  If the attack gained land,
+     *          this will be the attacker.  If not, then it will be the owner of the land
+     *          prior to the attack.  Or, if no reevaluation is needed, null.
+     */
+    public Player attack(Player attacker) {
+        Player playerToReevaluate = null;
+        //If the attacked space is empty land
         if (owner.getId().equals(LAND)) {
             this.hp = HP.WEAK;
             this.setOwnership(attacker);
-        } else if (!owner.getId().equals(SEA)) {
-            if (this.hp == HP.WEAK) {
+            attacker.addToTerritory(this);
+            playerToReevaluate = attacker;
+        //If the attacked space belongs to an enemy
+        } else if (attacker.getEnemyMap().containsKey(this.getOwnerId())) {
+            if (this.hp == HP.WEAK && this.owner.getTerritory().size() > 1) {
+                owner.removeFromTerritory(this);
+                playerToReevaluate = owner;
                 this.makeUnclaimedLand();
             } else if (this.hp == HP.STRONG) {
                 this.hp = HP.WEAK;
             }
+        //If the "attacked" space belongs to the attacker
+        } else if (this.getOwnerId().equals(attacker.getId())) {
+            this.hp = HP.STRONG;
         }
+        return playerToReevaluate;
     }
 
     public void setOwnership(Player player) {
         this.owner = player;
+
     }
 
     public void makeUnclaimedLand () {
