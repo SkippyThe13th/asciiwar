@@ -1,6 +1,10 @@
+package map;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+
+import game.Player;
 
 public class Map {
     private MapCell[][] map;
@@ -25,7 +29,7 @@ public class Map {
 
     /**
      * Creates a map with a height:width ratio of 1:3 with enough spawn points for the indicated number of
-     * players.  Player spawns will be connected by land in such a way that any spawn
+     * players.  game.Player spawns will be connected by land in such a way that any spawn
      * location can "access" any other be enough moves across land cells
      * @param numOfPlayers the number of players that the map should have spawn points for
      */
@@ -111,7 +115,7 @@ public class Map {
 
     /**
      * Populates the provided HashMap with a number of spawn points.  Spawns will have at least 2
-     * cells of space between them and any other spawn. Player spawns will not be an equal
+     * cells of space between them and any other spawn. game.Player spawns will not be an equal
      * distance from every other player spawn.
      * @param numOfPoints the number of points to be generated and added to the map
      * @param pointMap the map that the points should be added to
@@ -361,63 +365,62 @@ public class Map {
     }
 
     /**
-     * Attempts to find a cell adjacent to a Player's territory that is a valid expansion target.
+     * Attempts to find a cell adjacent to a game.Player's territory that is a valid expansion target.
      * Uses a {@link MapCellComparator} to determine the validity of the expansion target
      * @param player The player whose borders should be searched
      * @param comparatorType The type of expansion target to be searched for
-     * @return A MapCell that is a valid expansion target, null if none are found
+     * @return A map.MapCell that is a valid expansion target, null if none are found
      */
     public MapCell findExpansionTarget (Player player, MapCellComparator.Type comparatorType) {
         MapCellComparator comparator = new MapCellComparator(comparatorType, player);
-        Map.Direction expansionDirection;
+        Map.NeighborLocation expansionDirection;
         MapCell originBorder;
         ArrayList<MapCell> borders;
         int x, y, startDir, bordersChecked;
 
         startDir = rand.nextInt(4);
         if (startDir == 0) {
-            expansionDirection = Map.Direction.WEST;
+            expansionDirection = NeighborLocation.LEFT;
         } else if (startDir == 1) {
-            expansionDirection = Map.Direction.NORTH;
+            expansionDirection = NeighborLocation.UP;
         } else if (startDir == 2) {
-            expansionDirection = Map.Direction.EAST;
+            expansionDirection = NeighborLocation.RIGHT;
         } else {
-            expansionDirection = Map.Direction.SOUTH;
+            expansionDirection = NeighborLocation.DOWN;
         }
         bordersChecked = 0;
         while (bordersChecked < 4) {
             switch (expansionDirection) {
-                case WEST -> borders = player.getWestBorders();
-                case NORTH -> borders = player.getNorthBorders();
-                case EAST -> borders = player.getEastBorders();
-                case SOUTH -> borders = player.getSouthBorders();
+                case LEFT -> borders = player.getWestBorders();
+                case UP -> borders = player.getNorthBorders();
+                case RIGHT -> borders = player.getEastBorders();
+                case DOWN -> borders = player.getSouthBorders();
                 default -> {
                     return null;
                 }
             }
             if (borders.size() > 0){
                 originBorder = borders.get(rand.nextInt(borders.size()));
-                x = originBorder.getxLoc() - 1;
-                y = originBorder.getyLoc();
+                x = originBorder.getxLoc() + expansionDirection.x;
+                y = originBorder.getyLoc() - expansionDirection.y;
                 if (comparator.matches(map[x][y])){
                     return map[x][y];
                 }
-            } else {
-                switch (expansionDirection) {
-                    case WEST -> expansionDirection = Direction.NORTH;
-                    case NORTH -> expansionDirection = Direction.EAST;
-                    case EAST -> expansionDirection = Direction.SOUTH;
-                    case SOUTH -> expansionDirection = Direction.WEST;
-                }
-                bordersChecked++;
             }
+            switch (expansionDirection) {
+                case LEFT -> expansionDirection = NeighborLocation.UP;
+                case UP -> expansionDirection = NeighborLocation.RIGHT;
+                case RIGHT -> expansionDirection = NeighborLocation.DOWN;
+                case DOWN -> expansionDirection = NeighborLocation.LEFT;
+            }
+            bordersChecked++;
         }
         return null;
     }
 
     /**
      * Returns the cell found at coordinates (x, y) if it exists.
-     * @return the MapCell at the given coordinates, null if the coordinates are invalid
+     * @return the map.MapCell at the given coordinates, null if the coordinates are invalid
      */
     public MapCell getCell(Integer x, Integer y) {
         if ((0 < x && x < width) && (0 < y && y < height)) {

@@ -1,6 +1,10 @@
+package map;
+
+import game.Player;
+
 public class MapCell {
-    private static Land land = new Land();
-    private static Sea sea = new Sea();
+    private static final Land land = new Land();
+    private static final Sea sea = new Sea();
     private Player owner;
     private Integer xLoc, yLoc;
     private HP hp;
@@ -28,16 +32,6 @@ public class MapCell {
         this.owner = land;
         this.hp = HP.WEAK;
         this.isLand = true;
-    }
-
-    /**
-     * Returns a new MapCell that is roughly in the center of a map with the given dimensions
-     * @param height the height of the map the cell will belong to.
-     * @param width the width of the map the cell will belong to.
-     * @return a MapCell with its x and y values set to roughly the center of the map
-     */
-    public static MapCell createOriginCell(Integer height, Integer width) {
-        return new MapCell(width/2, height/2);
     }
 
     public static MapCell createOceanCell(int x, int y) {

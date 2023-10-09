@@ -1,9 +1,12 @@
-import java.sql.Array;
+package game;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import map.MapCell;
+
 public class Player {
-    //Player ids are unique per game, and range from 97-122 [inclusive-inclusive] which are the ascii decimal codes for lower case letters.
+    //game.Player ids are unique per game, and range from 97-122 [inclusive-inclusive] which are the ascii decimal codes for lower case letters.
     private Integer id, expansionFund;
     private char weakDisplay, strongDisplay;
     private ArrayList<MapCell> territory, westBorders, northBorders, eastBorders, southBorders;
@@ -21,7 +24,7 @@ public class Player {
         this.enemyMap = new HashMap<>();
     }
 
-    Player (String username, Integer id, char weakDisplay, char strongDisplay) {
+    protected Player (String username, Integer id, char weakDisplay, char strongDisplay) {
         this.username = username;
         this.id = id;
         this.weakDisplay = weakDisplay;
@@ -84,8 +87,8 @@ public class Player {
         expansionFund -= 1;
     }
 
-    public boolean canExpand() {
-        return expansionFund > 0;
+    public boolean canExpand(Integer times) {
+        return expansionFund >= times;
     }
 
     public Integer getId () {
@@ -108,6 +111,10 @@ public class Player {
 
     public char getStrongDisplay () {
         return strongDisplay;
+    }
+
+    public Integer getExpansionFund () {
+        return expansionFund;
     }
 
     public HashMap<Integer, Player> getEnemyMap () {

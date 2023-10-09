@@ -1,3 +1,7 @@
+package map;
+
+import game.Player;
+
 public class MapCellComparator {
     //if the cell is unclaimed land
     //
