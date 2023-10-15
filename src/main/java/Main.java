@@ -14,7 +14,7 @@ public class Main {
 
         Game game = new Game(Game.LandDensity.NORMAL, jackpot);
         for (String name : playerNames) {
-            namePlayerMap.put(name, game.addPlayer(new Player(name)));
+            //namePlayerMap.put(name, game.addPlayer(new Player(name)));
         }
         game.startGame();
         System.out.println(game.getMapString());

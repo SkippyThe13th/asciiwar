@@ -8,14 +8,16 @@ import map.MapCell;
 public class Player {
     //game.Player ids are unique per game, and range from 97-122 [inclusive-inclusive] which are the ascii decimal codes for lower case letters.
     private Integer id, expansionFund;
+    private long externalId;
     private char weakDisplay, strongDisplay;
     private ArrayList<MapCell> territory, westBorders, northBorders, eastBorders, southBorders;
     private String username;
     private HashMap<Integer, Player> enemyMap;
 
-    public Player(String username) {
+    public Player(String username, long externalId) {
         this.expansionFund = 0;
         this.username = username;
+        this.externalId = externalId;
         this.territory = new ArrayList<>();
         this.westBorders = new ArrayList<>();
         this.northBorders = new ArrayList<>();
@@ -103,6 +105,10 @@ public class Player {
 
     public String getUsername () {
         return username;
+    }
+
+    public long getExternalId () {
+        return externalId;
     }
 
     public char getWeakDisplay () {

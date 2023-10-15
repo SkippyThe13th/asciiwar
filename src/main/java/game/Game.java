@@ -2,9 +2,11 @@ package game;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+
 import map.Map;
 import map.MapCell;
 import map.MapCellComparator;
@@ -304,8 +306,26 @@ public class Game {
         }
     }
 
+    public Collection<Player> getPlayers() {
+        return idPlayerMap.values();
+    }
+
     public Player getPlayer(int id) {
         return idPlayerMap.get(id);
+    }
+
+    /**
+     * Returns a Player that exists in the game by their external id value
+     * @param externalId the unique identifier for the player
+     * @return the corresponding Player, null if none exists in the game
+     */
+    public Player getPlayerByExternalId(long externalId) {
+        for (Player player : idPlayerMap.values()) {
+            if (player.getExternalId() == externalId) {
+                return player;
+            }
+        }
+        return null;
     }
 
     public Integer getJackpot () {
