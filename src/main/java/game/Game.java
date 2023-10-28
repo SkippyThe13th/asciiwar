@@ -1,6 +1,7 @@
 package game;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,12 +21,12 @@ public class Game {
     private HashMap<Integer, Player> idPlayerMap;
     private Map map;
     private LandDensity landRatio;
-    private LocalDate startDate, endDate;
+    private LocalDateTime startDate, endDate;
     private Integer jackpot, gameStage;
 
     public Game(LandDensity landRatio, int startingJackpot) {
         this.idPlayerMap = new HashMap<>();
-        this.startDate = LocalDate.now();
+        this.startDate = LocalDateTime.now();
         this.endDate = startDate.plusWeeks(1);
         this.jackpot = startingJackpot;
         this.landRatio = landRatio;
@@ -336,11 +337,11 @@ public class Game {
         return map.toString();
     }
 
-    public LocalDate getStartDate () {
+    public LocalDateTime getStartDate () {
         return startDate;
     }
 
-    public LocalDate getEndDate () {
+    public LocalDateTime getEndDate () {
         return endDate;
     }
 
