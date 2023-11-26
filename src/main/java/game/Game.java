@@ -19,9 +19,11 @@ import static map.Map.NeighborLocation.UP;
 public class Game {
     private HashMap<Integer, Player> idPlayerMap;
     private Map map;
-    private LandDensity landRatio;
+    private final LandDensity landRatio;
     private LocalDateTime startDate, endDate;
     private Integer jackpot, gameStage;
+
+    private long recruitmentId = 0;
 
     public Game(LandDensity landRatio, int startingJackpot) {
         this.idPlayerMap = new HashMap<>();
@@ -40,13 +42,10 @@ public class Game {
     public void startGame() {
         this.map = new Map(idPlayerMap.size(), landRatio.getLandRatio());
         spawnPlayers();
-        advanceGameStage();
     }
 
     public GameReport endGame() {
-        GameReport report = new GameReport(this);
-
-        return report;
+        return new GameReport(this);
     }
 
     /**
@@ -80,7 +79,7 @@ public class Game {
             //game.Player ids are unique per game, and range from 97-122 [inclusive-inclusive] which are the ascii decimal codes for lower case letters.
             //ids are assigned first based on the first letter of the game.Player's username.  If a player has a duplicate id, then the new player
             //is assigned the next letter of the alphabet.
-            char id = newPlayer.getUsername().charAt(0);
+            char id = newPlayer.getUsername().toLowerCase().charAt(0);
             if (idPlayerMap.get((int)id) == null) {
                 newPlayer.setId((int)id);
                 idPlayerMap.put((int)id, newPlayer);
@@ -139,7 +138,8 @@ public class Game {
         } else {
             //The player tried to expand more times than their budget allows, so expand as many times as their
             //funds allow.
-            for (int i = 0; i < player.getExpansionFund(); i++) {
+            int playerFunds = player.getExpansionFund();
+            for (int i = 0; i < playerFunds; i++) {
 
                 result = executeExpansion(player);
                 if (result != null && result.getOwnerId().equals(player.getId())) {
@@ -195,6 +195,7 @@ public class Game {
             if (playerToReevaluate != null) {
                 evaluateBorders(playerToReevaluate, expansionTarget);
             }
+            map.updateCell(expansionTarget);
             player.chargeForExpansion();
             return expansionTarget;
         }
@@ -316,14 +317,16 @@ public class Game {
 
     /**
      * If the current game stage is less than 3, this method will increment the game stage
-     * value.  A value of 0 means a game has started and is in the recruitment phase. A
-     * value of 1 means recruitment has closed and the game is in the establishing phase.
-     * A value of 2 means that the game is in the war phase.  A value of 3 means the current
-     * game has concluded.
+     * value.  A value of 0 means a game  is in the recruitment phase. A value of 1 means
+     * recruitment has closed and the game is in the establishing phase. A value of 2 means
+     * that the game is in the war phase.  A value of 3 means the current game has concluded.
      */
     public void advanceGameStage() {
         if (gameStage < 3) {
             gameStage++;
+        }
+        if (gameStage == 1) {
+            startGame();
         }
     }
 
@@ -427,5 +430,13 @@ public class Game {
 
     public void setGameStage (Integer gameStage) {
         this.gameStage = gameStage;
+    }
+
+    public long getRecruitmentId () {
+        return recruitmentId;
+    }
+
+    public void setRecruitmentId (long recruitmentId) {
+        this.recruitmentId = recruitmentId;
     }
 }

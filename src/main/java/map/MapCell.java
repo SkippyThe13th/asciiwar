@@ -5,7 +5,8 @@ import game.Player;
 public class MapCell {
     private static final Land land = new Land();
     private static final Sea sea = new Sea();
-    private Player owner;
+    private long ownerExternalId;
+    private int ownerId;
     private Integer xLoc, yLoc;
     private HP hp;
     private boolean isLand;
@@ -21,7 +22,8 @@ public class MapCell {
     private MapCell() {
         this.xLoc = 0;
         this.yLoc = 0;
-        this.owner = sea;
+        this.ownerId = sea.getId();
+        this.ownerExternalId = 0;
         this.hp = HP.WEAK;
         this.isLand = false;
     }
@@ -29,7 +31,8 @@ public class MapCell {
     private MapCell(Integer x, Integer y) {
         this.xLoc = x;
         this.yLoc = y;
-        this.owner = land;
+        this.ownerId = land.getId();
+        this.ownerExternalId = 1;
         this.hp = HP.WEAK;
         this.isLand = true;
     }
@@ -58,14 +61,15 @@ public class MapCell {
     public Player attack(Player attacker) {
         Player playerToReevaluate = null;
         //If the attacked space is empty land
-        if (owner.getId().equals(LAND)) {
+        if (ownerId == LAND) {
             this.hp = HP.WEAK;
             this.setOwnership(attacker);
             attacker.addToTerritory(this);
             playerToReevaluate = attacker;
         //If the attacked space belongs to an enemy
         } else if (attacker.getEnemyMap().containsKey(this.getOwnerId())) {
-            if (this.hp == HP.WEAK && this.owner.getTerritory().size() > 1) {
+            Player owner = attacker.getEnemyMap().get(ownerId);
+            if (this.hp == HP.WEAK && owner.getTerritory().size() > 1) {
                 owner.removeFromTerritory(this);
                 playerToReevaluate = owner;
                 this.makeUnclaimedLand();
@@ -80,22 +84,25 @@ public class MapCell {
     }
 
     public void setOwnership(Player player) {
-        this.owner = player;
+        this.ownerId = player.getId();
+        this.ownerExternalId = player.getExternalId();
 
     }
 
     public void makeUnclaimedLand () {
         this.isLand = true;
-        this.owner = land;
+        this.ownerId = land.getId();
+        this.ownerExternalId = 1;
         this.hp = HP.WEAK;
     }
 
     public void makeSea() {
-        this.owner = sea;
+        this.ownerId = sea.getId();
+        this.ownerExternalId = 0;
         this.isLand = false;
     }
     public Integer getOwnerId () {
-        return owner.getId();
+        return ownerId;
     }
 
     public Integer getxLoc () {
@@ -116,9 +123,9 @@ public class MapCell {
 
     public int getDisplayCharId () {
         if (this.hp == HP.WEAK) {
-            return owner.getWeakDisplay();
+            return ownerId;
         } else {
-            return owner.getStrongDisplay();
+            return ownerId - 32;
         }
     }
 

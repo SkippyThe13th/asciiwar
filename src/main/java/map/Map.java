@@ -10,7 +10,6 @@ public class Map {
     private MapCell[][] map;
     private final ArrayList<MapCell> westShores, northShores, eastShores, southShores, unclaimedLand, spawnPoints;
     private Integer width, height;
-    private final Random rand = new Random();
 
     public Map(Integer numOfPlayers, double landRatio) {
         westShores = new ArrayList<>();
@@ -38,6 +37,7 @@ public class Map {
         ArrayList<MapCell> cornerSpawns = new ArrayList<>();
         int xOffset, yOffset;
         boolean mapSizeIsValid = false;
+        Random rand = new Random();
         MapPoint farLeft = null,
             farRight = null,
             farUp = null,
@@ -123,6 +123,7 @@ public class Map {
     private void generateSpawnPoints (int numOfPoints, HashMap<Integer, MapPoint> pointMap) {
         int tempX, tempY, relX, relY, nextId, nextRel;
         boolean neg, valid;
+        Random rand = new Random();
 
         nextId = 0;
         //insert starting point
@@ -207,6 +208,7 @@ public class Map {
     private void generateLand(MapCell[][] map, double landRatio) {
         double landCellMax = Math.floor((height * width) * landRatio);
         int dirCode, landCellCount = 0;
+        Random rand = new Random();
 
         for (MapCell[] cellRow : map) {
             for(MapCell cell : cellRow) {
@@ -265,6 +267,7 @@ public class Map {
     private MapCell addRandomLandToShore (Direction shore) {
         MapCell originShore;
         int x,y;
+        Random rand = new Random();
 
         switch (shore) {
             case WEST -> {
@@ -377,6 +380,7 @@ public class Map {
         Map.NeighborLocation expansionDirection;
         ArrayList<MapCell> borders;
         int x, y, startDir, bordersChecked;
+        Random rand = new Random();
 
         startDir = rand.nextInt(4);
         if (startDir == 0) {
@@ -418,6 +422,21 @@ public class Map {
             bordersChecked++;
         }
         return null;
+    }
+
+    /**
+     * Overwrites the existing map cell with newCell if newCell's coordinates exist within
+     * the map.
+     * @param newCell the cell value to be inserted in the map, overwriting the existing cell
+     * @return the newly updated cell, or null if the coordinates of the new cell were invalid
+     */
+    public MapCell updateCell(MapCell newCell) {
+        if (getCell(newCell.getxLoc(), newCell.getyLoc()) != null) {
+            map[newCell.getxLoc()][newCell.getyLoc()] = newCell;
+            return map[newCell.getxLoc()][newCell.getyLoc()];
+        } else {
+            return null;
+        }
     }
 
     public MapCell findImprovementTarget (Player player) {
