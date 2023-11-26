@@ -1,6 +1,5 @@
 package game;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -95,9 +94,23 @@ public class Game {
         return newPlayer;
     }
 
+    /**
+     * Adjusts a Player's Expansion Funds by a given amount.  This method also adds to the game's jackpot if fundsToAdd
+     * is a value greater than 0.
+     * @param player The player whose funds should be adjusted
+     * @param fundsToAdd The amount to adjust funds by.  Can be positive or negative.  Funds will be adjusted by adding
+     *               amount to the current funds.  If this addition would reduce the Player's funds below 0, their
+     *               funds will be set to 0 instead.
+     */
     public void adjustPlayerFunds(Player player, int fundsToAdd) {
-        idPlayerMap.get(player.getId()).addToExpansionFund(fundsToAdd);
-        jackpot += fundsToAdd;
+        if (fundsToAdd > 0) {
+            idPlayerMap.get(player.getId()).addToExpansionFund(fundsToAdd);
+            jackpot += fundsToAdd;
+        } else if (fundsToAdd < player.getExpansionFund()) {
+            idPlayerMap.get(player.getId()).addToExpansionFund(fundsToAdd);
+        } else if (fundsToAdd > player.getExpansionFund()) {
+            idPlayerMap.get(player.getId()).addToExpansionFund(-1 * player.getExpansionFund());
+        }
     }
 
     public ExpansionReport expand(Player player, int timesToExpand) {
@@ -301,6 +314,13 @@ public class Game {
         return nextId;
     }
 
+    /**
+     * If the current game stage is less than 3, this method will increment the game stage
+     * value.  A value of 0 means a game has started and is in the recruitment phase. A
+     * value of 1 means recruitment has closed and the game is in the establishing phase.
+     * A value of 2 means that the game is in the war phase.  A value of 3 means the current
+     * game has concluded.
+     */
     public void advanceGameStage() {
         if (gameStage < 3) {
             gameStage++;
@@ -383,5 +403,29 @@ public class Game {
         public double getLandRatio() {
             return this.ratio;
         }
+    }
+
+    public void setIdPlayerMap (HashMap<Integer, Player> idPlayerMap) {
+        this.idPlayerMap = idPlayerMap;
+    }
+
+    public void setMap (Map map) {
+        this.map = map;
+    }
+
+    public void setStartDate (LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
+
+    public void setEndDate (LocalDateTime endDate) {
+        this.endDate = endDate;
+    }
+
+    public void setJackpot (Integer jackpot) {
+        this.jackpot = jackpot;
+    }
+
+    public void setGameStage (Integer gameStage) {
+        this.gameStage = gameStage;
     }
 }

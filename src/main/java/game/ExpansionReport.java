@@ -15,7 +15,7 @@ public class ExpansionReport {
         this.player = player;
         this.territoryGained = new ArrayList<>();
         this.territoryWeakened = new ArrayList<>();
-        this. territoryImproved = new ArrayList<>();
+        this.territoryImproved = new ArrayList<>();
         this.expansionsAttempted = 0;
         this.successfulExpansions = 0;
     }
