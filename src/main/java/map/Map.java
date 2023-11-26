@@ -270,7 +270,7 @@ public class Map {
         Random rand = new Random();
 
         switch (shore) {
-            case WEST -> {
+            case WEST:
                 if(westShores.size() > 0) {
                     originShore = westShores.get(rand.nextInt(westShores.size()));
                     x = originShore.getxLoc() - 1;
@@ -282,8 +282,7 @@ public class Map {
                 } else {
                     return null;
                 }
-            }
-            case NORTH -> {
+            case NORTH:
                 if (northShores.size() > 0) {
                     originShore = northShores.get(rand.nextInt(northShores.size()));
                     x = originShore.getxLoc();
@@ -294,8 +293,7 @@ public class Map {
                 } else {
                     return null;
                 }
-            }
-            case EAST -> {
+            case EAST:
                 if (eastShores.size() > 0) {
                     originShore = eastShores.get(rand.nextInt(eastShores.size()));
                     x = originShore.getxLoc() + 1;
@@ -306,8 +304,7 @@ public class Map {
                 } else {
                     return null;
                 }
-            }
-            case SOUTH -> {
+            case SOUTH:
                 if (southShores.size() > 0) {
                     originShore = southShores.get(rand.nextInt(southShores.size()));
                     x = originShore.getxLoc();
@@ -318,10 +315,8 @@ public class Map {
                 } else {
                     return null;
                 }
-            }
-            default -> {
+            default:
                 return null;
-            }
         }
     }
 
@@ -395,13 +390,20 @@ public class Map {
         bordersChecked = 0;
         while (bordersChecked < 4) {
             switch (expansionDirection) {
-                case LEFT -> borders = player.getWestBorders();
-                case UP -> borders = player.getNorthBorders();
-                case RIGHT -> borders = player.getEastBorders();
-                case DOWN -> borders = player.getSouthBorders();
-                default -> {
+                case LEFT:
+                    borders = player.getWestBorders();
+                    break;
+                case UP:
+                    borders = player.getNorthBorders();
+                    break;
+                case RIGHT:
+                    borders = player.getEastBorders();
+                    break;
+                case DOWN:
+                    borders = player.getSouthBorders();
+                    break;
+                default:
                     return null;
-                }
             }
             if (borders.size() > 0){
                 for (MapCell borderCell : borders) {
@@ -414,10 +416,18 @@ public class Map {
                 }
             }
             switch (expansionDirection) {
-                case LEFT -> expansionDirection = NeighborLocation.UP;
-                case UP -> expansionDirection = NeighborLocation.RIGHT;
-                case RIGHT -> expansionDirection = NeighborLocation.DOWN;
-                case DOWN -> expansionDirection = NeighborLocation.LEFT;
+                case LEFT:
+                    expansionDirection = NeighborLocation.UP;
+                    break;
+                case UP:
+                    expansionDirection = NeighborLocation.RIGHT;
+                    break;
+                case RIGHT:
+                    expansionDirection = NeighborLocation.DOWN;
+                    break;
+                case DOWN:
+                    expansionDirection = NeighborLocation.LEFT;
+                    break;
             }
             bordersChecked++;
         }

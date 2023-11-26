@@ -17,10 +17,18 @@ public class MapCellComparator {
     public boolean matches (MapCell cell) {
         boolean result;
         switch (type) {
-            case UNCLAIMED_LAND -> result = isUnclaimedLand(cell);
-            case ENEMY_LAND -> result = isEnemyLand(cell);
-            case WEAK_OWNED_LAND -> result = isWeakOwnedLand(cell);
-            default -> result = false;
+            case UNCLAIMED_LAND:
+                result = isUnclaimedLand(cell);
+                break;
+            case ENEMY_LAND:
+                result = isEnemyLand(cell);
+                break;
+            case WEAK_OWNED_LAND:
+                result = isWeakOwnedLand(cell);
+                break;
+            default:
+                result = false;
+                break;
         }
         return result;
     }
