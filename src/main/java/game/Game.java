@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 import map.Map;
 import map.MapCell;
@@ -295,7 +296,7 @@ public class Game {
     public ArrayList<Player> getScores () {
         ArrayList<Player> winners;
 
-        winners = new ArrayList<>(idPlayerMap.values().stream().sorted(Comparator.comparingInt(player -> player.getTerritory().size())).toList());
+        winners = idPlayerMap.values().stream().sorted(Comparator.comparingInt(player -> player.getTerritory().size())).collect(Collectors.toCollection(ArrayList::new));
         winners.sort(Collections.reverseOrder());
 
         return winners;
