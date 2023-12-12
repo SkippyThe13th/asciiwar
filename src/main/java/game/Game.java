@@ -3,7 +3,6 @@ package game;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.stream.Collectors;
@@ -297,7 +296,6 @@ public class Game {
         ArrayList<Player> winners;
 
         winners = idPlayerMap.values().stream().sorted(Comparator.comparingInt(player -> player.getTerritory().size())).collect(Collectors.toCollection(ArrayList::new));
-        winners.sort(Collections.reverseOrder());
 
         return winners;
     }
