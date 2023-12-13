@@ -1,14 +1,23 @@
 package map;
 
+import com.google.gson.annotations.Expose;
+
 import game.Player;
 
 public class MapCell {
+    @Expose
     private static final Land land = new Land();
+    @Expose
     private static final Sea sea = new Sea();
+    @Expose
     private long ownerExternalId;
+    @Expose
     private int ownerId;
+    @Expose
     private Integer xLoc, yLoc;
+    @Expose
     private HP hp;
+    @Expose
     private boolean isLand;
 
     //acsii codes for '=' (land) and '~' (sea)

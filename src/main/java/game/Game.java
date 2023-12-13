@@ -8,6 +8,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
+import com.google.gson.annotations.Expose;
+
 import map.Map;
 import map.MapCell;
 import map.MapCellComparator;
@@ -18,12 +20,17 @@ import static map.Map.NeighborLocation.RIGHT;
 import static map.Map.NeighborLocation.UP;
 
 public class Game {
+    @Expose
     private HashMap<Integer, Player> idPlayerMap;
+    @Expose
     private Map map;
+    @Expose
     private final LandDensity landRatio;
+    @Expose
     private LocalDateTime startDate, endDate;
+    @Expose
     private Integer jackpot, gameStage;
-
+    @Expose
     private long recruitmentId = 0;
 
     public Game(LandDensity landRatio, int startingJackpot) {
@@ -335,7 +342,7 @@ public class Game {
         return idPlayerMap.values();
     }
 
-    public Player getPlayer(int id) {
+    public Player getPlayerById(int id) {
         return idPlayerMap.get(id);
     }
 
