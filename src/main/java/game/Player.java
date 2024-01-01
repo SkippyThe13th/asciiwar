@@ -1,27 +1,17 @@
 package game;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import com.google.gson.annotations.Expose;
 
 import map.MapCell;
 
 public class Player {
     //game.Player ids are unique per game, and range from 97-122 [inclusive-inclusive] which are the ascii decimal codes for lower case letters.
-    @Expose
     private Integer id, expansionFund;
-    @Expose
     private long externalId;
-    @Expose
     private char weakDisplay, strongDisplay;
-    @Expose
     private ArrayList<MapCell> territory, westBorders, northBorders, eastBorders, southBorders;
-    @Expose
     private String username;
-    @Expose
     private ArrayList<Integer> enemyIdList;
-    private HashMap<Integer, Player> enemyMap;
 
     public Player(String username, long externalId) {
         this.expansionFund = 0;
@@ -32,7 +22,6 @@ public class Player {
         this.northBorders = new ArrayList<>();
         this.eastBorders = new ArrayList<>();
         this.southBorders = new ArrayList<>();
-        this.enemyMap = new HashMap<>();
         this.enemyIdList = new ArrayList<>();
     }
 
@@ -43,22 +32,14 @@ public class Player {
         this.strongDisplay = strongDisplay;
     }
 
-    public void populateEnemyMap (Game game) {
-        for (Integer enemyId : enemyIdList) {
-            enemyMap.put(enemyId, game.getPlayerById(enemyId));
-        }
-    }
-
     public void addEnemy(Player player) {
         if (!enemyIdList.contains(player.getId())) {
             enemyIdList.add(player.getId());
         }
-        enemyMap.put(player.getId(), player);
     }
 
     public void removeEnemy(Player player) {
         enemyIdList.remove(player.getId());
-        enemyMap.remove(player.getId());
     }
 
     public void addToTerritory(MapCell cell) {
@@ -143,10 +124,6 @@ public class Player {
         return expansionFund;
     }
 
-    public HashMap<Integer, Player> getEnemyMap () {
-        return enemyMap;
-    }
-
     public ArrayList<MapCell> getWestBorders () {
         return westBorders;
     }
@@ -165,5 +142,9 @@ public class Player {
 
     public ArrayList<MapCell> getTerritory () {
         return territory;
+    }
+
+    public ArrayList<Integer> getEnemyIdList () {
+        return this.enemyIdList;
     }
 }

@@ -1,23 +1,16 @@
 package map;
 
-import com.google.gson.annotations.Expose;
+import java.util.HashMap;
 
 import game.Player;
 
 public class MapCell {
-    @Expose
     private static final Land land = new Land();
-    @Expose
     private static final Sea sea = new Sea();
-    @Expose
     private long ownerExternalId;
-    @Expose
     private int ownerId;
-    @Expose
     private Integer xLoc, yLoc;
-    @Expose
     private HP hp;
-    @Expose
     private boolean isLand;
 
     //acsii codes for '=' (land) and '~' (sea)
@@ -67,7 +60,7 @@ public class MapCell {
      *          this will be the attacker.  If not, then it will be the owner of the land
      *          prior to the attack.  Or, if no reevaluation is needed, null.
      */
-    public Player attack(Player attacker) {
+    public Player attack(Player attacker, HashMap<Integer, Player> idPlayerMap) {
         Player playerToReevaluate = null;
         //If the attacked space is empty land
         if (ownerId == LAND) {
@@ -76,8 +69,8 @@ public class MapCell {
             attacker.addToTerritory(this);
             playerToReevaluate = attacker;
         //If the attacked space belongs to an enemy
-        } else if (attacker.getEnemyMap().containsKey(this.getOwnerId())) {
-            Player owner = attacker.getEnemyMap().get(ownerId);
+        } else if (attacker.getEnemyIdList().contains(this.getOwnerId())) {
+            Player owner = idPlayerMap.get(ownerId);
             if (this.hp == HP.WEAK && owner.getTerritory().size() > 1) {
                 owner.removeFromTerritory(this);
                 playerToReevaluate = owner;

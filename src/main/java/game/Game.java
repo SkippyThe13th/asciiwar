@@ -8,8 +8,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
-import com.google.gson.annotations.Expose;
-
 import map.Map;
 import map.MapCell;
 import map.MapCellComparator;
@@ -20,17 +18,11 @@ import static map.Map.NeighborLocation.RIGHT;
 import static map.Map.NeighborLocation.UP;
 
 public class Game {
-    @Expose
     private HashMap<Integer, Player> idPlayerMap;
-    @Expose
     private Map map;
-    @Expose
     private final LandDensity landRatio;
-    @Expose
     private LocalDateTime startDate, endDate;
-    @Expose
     private Integer jackpot, gameStage;
-    @Expose
     private long recruitmentId = 0;
 
     public Game(LandDensity landRatio, int startingJackpot) {
@@ -190,7 +182,7 @@ public class Game {
             expansionTarget = map.findExpansionTarget(player, MapCellComparator.Type.UNCLAIMED_LAND);
         }
         //if none, attack adjacent enemy land
-        if (expansionTarget == null && (gameStage == 2 && player.getEnemyMap().size() > 0)) {
+        if (expansionTarget == null && (gameStage == 2 && !player.getEnemyIdList().isEmpty())) {
             expansionTarget = map.findExpansionTarget(player, MapCellComparator.Type.ENEMY_LAND);
         }
         //if not at war or no adjacent enemies, look to improve WEAK land
@@ -199,7 +191,7 @@ public class Game {
         }
 
         if (expansionTarget != null) {
-            playerToReevaluate = expansionTarget.attack(player);
+            playerToReevaluate = expansionTarget.attack(player, idPlayerMap);
             if (playerToReevaluate != null) {
                 evaluateBorders(playerToReevaluate, expansionTarget);
             }
@@ -293,7 +285,7 @@ public class Game {
     public boolean petitionPeace(Player initiator, Player target) {
         idPlayerMap.get(initiator.getId()).removeEnemy(target);
         //The initiator is not an enemy to the target, so mutual peace has been established
-        return target.getEnemyMap().get(initiator.getId()) == null;
+        return target.getEnemyIdList().contains(initiator.getId());
     }
 
     /**

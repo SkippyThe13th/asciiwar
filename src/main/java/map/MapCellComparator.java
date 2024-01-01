@@ -38,7 +38,7 @@ public class MapCellComparator {
     }
 
     private boolean isEnemyLand (MapCell cell) {
-        return cell != null && player.getEnemyMap().containsKey(cell.getOwnerId());
+        return cell != null && player.getEnemyIdList().contains(cell.getOwnerId());
     }
 
     private boolean isUnclaimedLand (MapCell cell) {

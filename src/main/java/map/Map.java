@@ -4,16 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-import com.google.gson.annotations.Expose;
-
 import game.Player;
 
 public class Map {
-    @Expose
     private MapCell[][] map;
-    @Expose
     private final ArrayList<MapCell> westShores, northShores, eastShores, southShores, unclaimedLand, spawnPoints;
-    @Expose
     private Integer width, height;
 
     public Map(Integer numOfPlayers, double landRatio) {
