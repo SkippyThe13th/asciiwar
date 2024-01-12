@@ -18,7 +18,7 @@ import static map.Map.NeighborLocation.RIGHT;
 import static map.Map.NeighborLocation.UP;
 
 public class Game {
-    private HashMap<Integer, Player> idPlayerMap;
+    private static HashMap<Integer, Player> idPlayerMap;
     private Map map;
     private final LandDensity landRatio;
     private LocalDateTime startDate, endDate;
@@ -26,7 +26,7 @@ public class Game {
     private long recruitmentId = 0;
 
     public Game(LandDensity landRatio, int startingJackpot) {
-        this.idPlayerMap = new HashMap<>();
+        idPlayerMap = new HashMap<>();
         this.startDate = LocalDateTime.now();
         this.endDate = startDate.plusWeeks(1);
         this.jackpot = startingJackpot;
@@ -191,7 +191,7 @@ public class Game {
         }
 
         if (expansionTarget != null) {
-            playerToReevaluate = expansionTarget.attack(player, idPlayerMap);
+            playerToReevaluate = idPlayerMap.get(expansionTarget.attack(player, idPlayerMap));
             if (playerToReevaluate != null) {
                 evaluateBorders(playerToReevaluate, expansionTarget);
             }
@@ -284,8 +284,8 @@ public class Game {
      */
     public boolean petitionPeace(Player initiator, Player target) {
         idPlayerMap.get(initiator.getId()).removeEnemy(target);
-        //The initiator is not an enemy to the target, so mutual peace has been established
-        return target.getEnemyIdList().contains(initiator.getId());
+        //If the initiator is not an enemy to the target, mutual peace has been established
+        return !target.getEnemyIdList().contains(initiator.getId());
     }
 
     /**
