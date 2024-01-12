@@ -18,7 +18,7 @@ import static map.Map.NeighborLocation.RIGHT;
 import static map.Map.NeighborLocation.UP;
 
 public class Game {
-    private static HashMap<Integer, Player> idPlayerMap;
+    private HashMap<Integer, Player> idPlayerMap;
     private Map map;
     private final LandDensity landRatio;
     private LocalDateTime startDate, endDate;
@@ -191,10 +191,11 @@ public class Game {
         }
 
         if (expansionTarget != null) {
-            playerToReevaluate = idPlayerMap.get(expansionTarget.attack(player, idPlayerMap));
-            if (playerToReevaluate != null) {
-                evaluateBorders(playerToReevaluate, expansionTarget);
-            }
+            playerToReevaluate = expansionTarget.attack(player, idPlayerMap);
+            //Update affected Player reference in idPlayerMap
+            idPlayerMap.put(playerToReevaluate.getId(), playerToReevaluate);
+
+            evaluateBorders(playerToReevaluate, expansionTarget);
             map.updateCell(expansionTarget);
             player.chargeForExpansion();
             return expansionTarget;

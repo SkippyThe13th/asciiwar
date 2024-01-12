@@ -56,25 +56,24 @@ public class MapCell {
      * player, then the hp of the land is reduced.  If the owned land has an hp of
      * WEAK, then the owner loses control of the land
      * @param attacker the attacking player
-     * @return the game id of the Player whose borders should be reevaluated.  If the attack gained land,
+     * @return the Player whose borders should be reevaluated.  If the attack gained land,
      *          this will be the attacker.  If not, then it will be the owner of the land
      *          prior to the attack.  Or, if no reevaluation is needed, null.
      */
-    public Integer attack(Player attacker, HashMap<Integer, Player> idPlayerMap) {
-        Integer playerToReevaluate = null;
+    public Player attack(Player attacker, HashMap<Integer, Player> idPlayerMap) {
+        Player playerToReevaluate = null;
         //If the attacked space is empty land
         if (ownerId == LAND) {
             this.hp = HP.WEAK;
             this.setOwnership(attacker);
             attacker.addToTerritory(this);
-            playerToReevaluate = attacker.getId();
+            playerToReevaluate = attacker;
         //If the attacked space belongs to an enemy
         } else if (attacker.getEnemyIdList().contains(this.getOwnerId())) {
             Player owner = idPlayerMap.get(ownerId);
             if (this.hp == HP.WEAK && owner.getTerritory().size() > 1) {
                 owner.removeFromTerritory(this);
-                idPlayerMap.put(owner.getId(), owner);
-                playerToReevaluate = owner.getId();
+                playerToReevaluate = owner;
                 this.makeUnclaimedLand();
             } else if (this.hp == HP.STRONG) {
                 this.hp = HP.WEAK;
