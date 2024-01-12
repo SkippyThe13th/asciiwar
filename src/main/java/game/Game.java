@@ -26,7 +26,7 @@ public class Game {
     private long recruitmentId = 0;
 
     public Game(LandDensity landRatio, int startingJackpot) {
-        idPlayerMap = new HashMap<>();
+        this.idPlayerMap = new HashMap<>();
         this.startDate = LocalDateTime.now();
         this.endDate = startDate.plusWeeks(1);
         this.jackpot = startingJackpot;
