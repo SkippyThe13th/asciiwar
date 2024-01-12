@@ -81,6 +81,7 @@ public class MapCell {
         //If the "attacked" space belongs to the attacker
         } else if (this.getOwnerId().equals(attacker.getId())) {
             this.hp = HP.STRONG;
+            playerToReevaluate = attacker;
         }
         return playerToReevaluate;
     }
