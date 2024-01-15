@@ -63,23 +63,23 @@ public class Player {
     }
 
     public void removeFromWestBorder(MapCell cell) {
-        westBorders.remove(cell);
+        westBorders.removeIf(myCell -> myCell.getxLoc().equals(cell.getxLoc()) && myCell.getyLoc().equals(cell.getyLoc()));
     }
 
     public void removeFromNorthBorder(MapCell cell) {
-        northBorders.remove(cell);
+        northBorders.removeIf(myCell -> myCell.getxLoc().equals(cell.getxLoc()) && myCell.getyLoc().equals(cell.getyLoc()));
     }
 
     public void removeFromEastBorder(MapCell cell) {
-        eastBorders.remove(cell);
+        eastBorders.removeIf(myCell -> myCell.getxLoc().equals(cell.getxLoc()) && myCell.getyLoc().equals(cell.getyLoc()));
     }
 
     public void removeFromSouthBorder(MapCell cell) {
-        southBorders.remove(cell);
+        southBorders.removeIf(myCell -> myCell.getxLoc().equals(cell.getxLoc()) && myCell.getyLoc().equals(cell.getyLoc()));
     }
 
     public void removeFromTerritory(MapCell cell) {
-        territory.remove(cell);
+        territory.removeIf(myCell -> myCell.getxLoc().equals(cell.getxLoc()) && myCell.getyLoc().equals(cell.getyLoc()));
     }
 
     public void addToExpansionFund(Integer units) {

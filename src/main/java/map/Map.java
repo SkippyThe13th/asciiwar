@@ -377,6 +377,7 @@ public class Map {
         int x, y, startDir, bordersChecked;
         Random rand = new Random();
 
+        //Determine border direction to begin search along
         startDir = rand.nextInt(4);
         if (startDir == 0) {
             expansionDirection = NeighborLocation.LEFT;
@@ -387,6 +388,7 @@ public class Map {
         } else {
             expansionDirection = NeighborLocation.DOWN;
         }
+        //Loop through each border list, return if valid expansion target is found
         bordersChecked = 0;
         while (bordersChecked < 4) {
             switch (expansionDirection) {
@@ -415,6 +417,7 @@ public class Map {
                     }
                 }
             }
+            //Since we didn't return, rotate to the next list of border cells
             switch (expansionDirection) {
                 case LEFT:
                     expansionDirection = NeighborLocation.UP;
@@ -431,6 +434,7 @@ public class Map {
             }
             bordersChecked++;
         }
+        //No valid expansion target was found
         return null;
     }
 

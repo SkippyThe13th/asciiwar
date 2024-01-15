@@ -104,6 +104,7 @@ public class MapCell {
         this.ownerExternalId = 0;
         this.isLand = false;
     }
+
     public Integer getOwnerId () {
         return ownerId;
     }
