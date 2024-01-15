@@ -71,9 +71,9 @@ public class MapCell {
         //If the attacked space belongs to an enemy
         } else if (attacker.getEnemyIdList().contains(this.getOwnerId())) {
             Player owner = idPlayerMap.get(ownerId);
+            playerToReevaluate = owner;
             if (this.hp == HP.WEAK && owner.getTerritory().size() > 1) {
                 owner.removeFromTerritory(this);
-                playerToReevaluate = owner;
                 this.makeUnclaimedLand();
             } else if (this.hp == HP.STRONG) {
                 this.hp = HP.WEAK;
